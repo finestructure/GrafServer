@@ -1,12 +1,14 @@
 import couchdb
 import logging
+import config
 
 logger = logging.getLogger('graf.database')
 
-class Handle(object):
+
+class Server(object):
   
-  def __init__(self, baseurl):
-    self.server = couchdb.Server('http://' + baseurl)
+  def __init__(self, url):
+    self.server = couchdb.Server(url)
 
   
   def create_database(self, dbname):
@@ -42,13 +44,13 @@ class Database(object):
     self.db = db
 
   design_name = '_design/graf'
-  version = 10
+  version = 1
   views = {
     'unprocessed_docs': {
       'map' : """
         function(doc) {
           if (! doc.processed) {
-            emit(doc._id, null);
+            emit([doc.created_at, doc._id], null);
           }
         }
       """
@@ -111,5 +113,59 @@ class Database(object):
     return getattr(self.db, name)
 
 
+class DatabaseNotFound(Exception):
+  pass
+  
+class DocumentNotFound(Exception):
+  pass
 
 
+def create_database(env, dbname=None):
+  url = config.get(env, 'url')
+  server = Server(url)
+  if dbname is None:
+    dbname = config.get(env, 'dbname')
+  logger.info('Creating database: %s' % dbname)
+  server.create_database(dbname)
+
+
+def drop_database(env, dbname=None):
+  url = config.get(env, 'url')
+  server = Server(url)
+  if dbname is None:
+    dbname = config.get(env, 'dbname')
+  logger.info( 'Dropping database: %s'% dbname )
+  server.drop_database(dbname)
+
+
+def recreate_database(env, dbname=None):
+  drop_database(env, dbname)
+  create_database(env, dbname)
+
+
+def connect(env, dbname=None):
+  if hasattr(env, 'get'):
+    # we have a dictionary with connection info
+    url = env.get('url')
+    debug = env.get('debug')
+    if dbname is None:
+      dbname = env.get('dbname')
+  else:
+    url = config.get(env, 'url')
+    debug = config.debug(env)
+    if dbname is None:
+      dbname = config.get(env, 'dbname')
+  server = Server(url)
+  logger.info('Connecting to: %s'  % url )
+  logger.info('Using database: %s' % dbname )
+  db = server.connect(dbname)
+  db.env = env
+  return db
+
+
+def dbinfo(env):
+  info = {}
+  for key in ['url', 'dbname']:
+    info[key] = config.get(env, key)
+  info['debug'] = config.debug(env)
+  return info

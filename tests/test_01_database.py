@@ -2,7 +2,8 @@ from nose.tools import ok_, eq_, raises
 import couchdb
 
 from graf import config
-from graf.database import Handle, Database
+from graf.database import Server, Database, create_database, connect, \
+  drop_database
 
 env = 'TEST'
 
@@ -10,32 +11,31 @@ class TestConnection(object):
 
   def setUp(self):
     url = config.get(env, 'url')
-    tech, baseurl = url.split('://')
-    self.handle = Handle(baseurl)
-    self.server = couchdb.Server('http://'+baseurl)
+    self.server = Server(url)
+    self.couchdb_server = couchdb.Server(url)
   
   
   def test_01_create_database(self):
     dbname = config.get(env, 'dbname')
-    self.handle.create_database(dbname)
-    ok_(self.server[dbname])
+    self.server.create_database(dbname)
+    ok_(self.couchdb_server[dbname])
   
   
   def test_02_drop_database(self):
     dbname = config.get(env, 'dbname')
-    self.handle.create_database(dbname)
-    self.handle.drop_database(dbname)
+    self.server.create_database(dbname)
+    self.server.drop_database(dbname)
     @raises(couchdb.ResourceNotFound)
     def check():
-      self.server[dbname]
+      self.couchdb_server[dbname]
     check()
     
     
   def test_03_check_views(self):
     # setup
     dbname = config.get(env, 'dbname')
-    self.handle.create_database(dbname)
-    db = self.handle.connect(dbname)
+    self.server.create_database(dbname)
+    db = self.server.connect(dbname)
     db.check_views()
     # test
     design = db.get('_design/graf')
@@ -43,6 +43,43 @@ class TestConnection(object):
     ok_(design['views'])
     eq_(Database.version, design['version'])
     # cleanup
-    self.handle.drop_database(dbname)
+    self.server.drop_database(dbname)
+
+
+class TestDatabase(object):
+  
+  
+  def setUp(self):
+    create_database(env)
+    self.db = connect(env)
+    self.db.check_views()
+  
+  
+  def tearDown(self):
+    #drop_database(env)
+    pass
+
+
+  def test_01_view_unprocessed_docs(self):
+    created_at = '2012-02-20T00:%02d:00Z'
+    for i in range(10):
+      key = 'doc_%d' % i
+      doc = {
+        'created_at' : created_at % i,
+      }
+      if i % 2 == 0:
+        doc['processed'] = True
+        
+      self.db[key] = doc
+    
+    res = self.db.view('_design/graf/_view/unprocessed_docs')
+    eq_(len(res), 5)
+    
+    subset = res[['2012-02-20T00:01:00Z', None]:['2012-02-20T00:07:00Z', None]]
+    eq_(len(subset), 3)
+    eq_(subset.rows[0].key, ['2012-02-20T00:01:00Z', 'doc_1'])
+    eq_(subset.rows[1].key, ['2012-02-20T00:03:00Z', 'doc_3'])
+    eq_(subset.rows[2].key, ['2012-02-20T00:05:00Z', 'doc_5'])
+
 
 
