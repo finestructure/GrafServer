@@ -1,0 +1,9 @@
+Mon Feb 20 11:33:12 CET 2012
+Darwin Thebe.local 11.3.0 Darwin Kernel Version 11.3.0: Thu Jan 12 18:47:41 PST 2012; root:xnu-1699.24.23~1/RELEASE_X86_64 x86_64
+test_01_database.TestConnection.test_01_create_database ... ok
+test_01_database.TestConnection.test_02_drop_database ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.171s
+
+OK
