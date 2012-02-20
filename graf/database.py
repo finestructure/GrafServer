@@ -53,7 +53,7 @@ class Database(object):
       'map' : """
         function(doc) {
           if (! doc.processed) {
-            emit([doc.created_at, doc._id], null);
+            emit(doc.created_at, null);
           }
         }
       """

@@ -57,7 +57,6 @@ class TestDatabase(object):
   
   def tearDown(self):
     drop_database(env)
-    pass
 
 
   def test_01_view_unprocessed_docs(self):
@@ -75,11 +74,11 @@ class TestDatabase(object):
     res = self.db.unprocessed_docs_view()
     eq_(len(res), 5)
     
-    subset = res[['2012-02-20T00:01:00Z', None]:['2012-02-20T00:07:00Z', None]]
+    subset = res['2012-02-20T00:01:00Z':'2012-02-20T00:05:00Z']
     eq_(len(subset), 3)
-    eq_(subset.rows[0].key, ['2012-02-20T00:01:00Z', 'doc_1'])
-    eq_(subset.rows[1].key, ['2012-02-20T00:03:00Z', 'doc_3'])
-    eq_(subset.rows[2].key, ['2012-02-20T00:05:00Z', 'doc_5'])
+    eq_(subset.rows[0].key, '2012-02-20T00:01:00Z')
+    eq_(subset.rows[1].key, '2012-02-20T00:03:00Z')
+    eq_(subset.rows[2].key, '2012-02-20T00:05:00Z')
 
 
 
