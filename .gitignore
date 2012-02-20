@@ -1,0 +1,8 @@
+*.pyc
+.coverage
+.coverage.xml
+.nosetests.xml
+.sloccount.sc
+coverage/*
+virtual_envs-*/*
+dependencies/*.log
