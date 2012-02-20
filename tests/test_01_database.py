@@ -56,7 +56,7 @@ class TestDatabase(object):
   
   
   def tearDown(self):
-    #drop_database(env)
+    drop_database(env)
     pass
 
 
@@ -72,7 +72,7 @@ class TestDatabase(object):
         
       self.db[key] = doc
     
-    res = self.db.view('_design/graf/_view/unprocessed_docs')
+    res = self.db.unprocessed_docs_view()
     eq_(len(res), 5)
     
     subset = res[['2012-02-20T00:01:00Z', None]:['2012-02-20T00:07:00Z', None]]

@@ -43,10 +43,13 @@ class Database(object):
   def __init__(self, db):
     self.db = db
 
+  # view constants
   design_name = '_design/graf'
   version = 1
+  unprocessed_docs = 'unprocessed_docs'
+  doc_created_at = 'doc_created_at'
   views = {
-    'unprocessed_docs': {
+    unprocessed_docs : {
       'map' : """
         function(doc) {
           if (! doc.processed) {
@@ -55,7 +58,7 @@ class Database(object):
         }
       """
     },
-    'doc_created_at' : {
+    doc_created_at : {
       'map' : """
         function(doc) {
           if (doc.created_at) {
@@ -87,6 +90,9 @@ class Database(object):
       design['version'] = self.version
       self.db[self.design_name] = design
 
+
+  def unprocessed_docs_view(self):
+    return self.db.view(self.design_name + '/_view/' + self.unprocessed_docs)
 
 
   def __getitem__(self, key):
