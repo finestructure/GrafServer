@@ -14,6 +14,7 @@ def process_doc(doc):
   text = pypsum.get_lipsum(howmany=count, what='words', start_with_lipsum='0')
   text = text[0]
   text = ' '.join(text.split()[:count]) # service always returns at least 5 words
+  logger.info("           '%s' => %s" % (doc.id, text))
   doc['text_result'] = text
   doc['processed'] = True
   return doc
