@@ -2,29 +2,36 @@ import database
 import time
 import logging
 from optparse import OptionParser
+import thread_pool
 import pypsum
 import random
 
 logger = logging.getLogger('graf.process_images')
 
+POOL_SIZE = 8
+pool = thread_pool.ThreadPool(POOL_SIZE)
 
-def process_doc(doc):
+
+def process_doc(db, doc):
   logger.info("Processing '%s'" % doc.id)
   count = int(random.uniform(1,4))
   text = pypsum.get_lipsum(howmany=count, what='words', start_with_lipsum='0')
   text = text[0]
   text = ' '.join(text.split()[:count]) # service always returns at least 5 words
   logger.info("           '%s' => %s" % (doc.id, text))
+  time.sleep(count)
   doc['text_result'] = text
   doc['processed'] = True
-  return doc
+  db.save(doc)
 
 
 def process_images(db):
   for row in db.unprocessed_docs_view():
     doc = db[row.id]
-    doc = process_doc(doc)
-    db.save(doc)
+    try:
+      pool.schedule_work(process_doc, db, doc)
+    except Exception, e:
+      logger.warn("Skipped '%s' due to exception '%s'", (row.id, e))
 
 
 if __name__ == '__main__':
