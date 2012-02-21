@@ -32,7 +32,7 @@ class Server(object):
 
   def connect(self, dbname):
     try:
-      logger.debug("Connect to database '%s'" % dbname)
+      logger.debug("Connecting to database '%s'" % dbname)
       return Database(self.server[dbname])
     except couchdb.ResourceNotFound:
       raise DatabaseNotFound(dbname)
@@ -140,7 +140,7 @@ def drop_database(env, dbname=None):
   server = Server(url)
   if dbname is None:
     dbname = config.get(env, 'dbname')
-  logger.info( 'Dropping database: %s'% dbname )
+  logger.info( 'Dropping database: %s' % dbname )
   server.drop_database(dbname)
 
 
@@ -166,6 +166,7 @@ def connect(env, dbname=None):
   logger.info('Using database: %s' % dbname )
   db = server.connect(dbname)
   db.env = env
+  db.check_views()
   return db
 
 
