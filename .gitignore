@@ -6,3 +6,4 @@
 coverage/*
 virtual_envs-*/*
 dependencies/*.log
+graf/environments.cfg
