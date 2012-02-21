@@ -111,6 +111,17 @@ class Database(object):
     """
     self.db[key] = value
   
+  
+  def __delitem__(self, key):
+    """
+    Dict-like delete routed through to couchdb.Database
+    """
+    del self.db[key]
+  
+  
+  def __contains__(self, key):
+    return key in self.db
+  
 
   def __getattr__(self, name):
     """

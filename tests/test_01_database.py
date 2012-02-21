@@ -81,4 +81,10 @@ class TestDatabase(object):
     eq_(subset.rows[2].key, '2012-02-20T00:05:00Z')
 
 
+  def test_02_delitem_contains(self):
+    self.db['test'] = {'key':'value'}
+    ok_('test' in self.db)
+    ok_('foo' not in self.db)
+    del self.db['test']
+    ok_('test' not in self.db)
 
