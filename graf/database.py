@@ -95,6 +95,13 @@ class Database(object):
     return self.db.view(self.design_name + '/_view/' + self.unprocessed_docs)
 
 
+  def save(self, doc):
+    try:
+      return self.db.save(doc)
+    except couchdb.ResourceConflict, e:
+      raise UpdateConflict(e)
+
+
   def __getitem__(self, key):
     """
     Dict-like accessor routed through to couchdb.Database
@@ -134,6 +141,9 @@ class DatabaseNotFound(Exception):
   pass
   
 class DocumentNotFound(Exception):
+  pass
+
+class UpdateConflict(couchdb.ResourceConflict):
   pass
 
 

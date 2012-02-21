@@ -34,8 +34,7 @@ class TestProcessImages(object):
     res = self.db.unprocessed_docs_view()
     eq_(len(res), 5)
 
-    process_images.process_images(self.db)
-    process_images.pool.join()
+    process_images.start_image_processor(env, loop=False, wait=True)
     
     res = self.db.unprocessed_docs_view()
     eq_(len(res), 0)
