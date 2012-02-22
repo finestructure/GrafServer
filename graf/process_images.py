@@ -3,7 +3,7 @@ import time
 import logging
 from optparse import OptionParser
 import thread_pool
-import pypsum
+from graf.vendor import pypsum
 import random
 
 logger = logging.getLogger('graf.process_images')
