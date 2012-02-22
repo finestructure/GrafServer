@@ -26,7 +26,7 @@ class TestProcessImages(object):
     # replace dbc_request with a dummy so we don't get charged each time we test
     def mock_dbc_request(*args):
       print 'mock request'
-      return process_images.dummy_request()
+      return 'fake id', process_images.dummy_request()
     process_images.dbc_request = mock_dbc_request
     
     created_at = '2012-02-20T00:%02d:00Z'

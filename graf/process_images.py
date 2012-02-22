@@ -24,9 +24,19 @@ class DbcWorker(thread_pool.Worker):
       self.requests.task_done()
 
 
-def dbc_request(client, image=None):
-  print 'balance:', client.get_balance()
-  return dummy_request()
+def dbc_request(client, db, doc):
+  """
+  Sends image to the DBC server for decoding. Returns the request id (captcha id)
+  and the text result or nil if there was no result or a timeout.
+  """
+  image = db.get_image(doc)
+  captcha = client.decode(image, timeout=60)
+  if captcha:
+    # The CAPTCHA was solved; captcha["captcha"] item holds its
+    # numeric ID, and captcha["text"] item its text.
+    return (captcha["captcha"], captcha["text"])
+  else:
+    return (None, None)
 
 
 def dummy_request():
@@ -40,8 +50,10 @@ def dummy_request():
 
 def process_doc(client, db, doc):
   logger.info("Processing '%s'" % doc.id)
-  doc['text_result'] = dbc_request(client)
-  logger.info("           '%s' => %s" % (doc.id, doc['text_result']))
+  request_id, text_result = dbc_request(client, db, doc)
+  logger.info("           '%s' => %s" % (doc.id, text_result))
+  doc['text_result'] = text_result
+  doc['request_id'] = request_id
   doc['processed'] = True
   try:
     db.save(doc)
