@@ -50,13 +50,18 @@ class TestDatabase(object):
   
   
   def setUp(self):
+    try:
+      drop_database(env)
+    except:
+      pass
     create_database(env)
     self.db = connect(env)
     self.db.check_views()
   
   
   def tearDown(self):
-    drop_database(env)
+    #drop_database(env)
+    pass
 
 
   def test_01_view_unprocessed_docs(self):
@@ -88,3 +93,20 @@ class TestDatabase(object):
     del self.db['test']
     ok_('test' not in self.db)
 
+
+  def test_03_save_get_image(self):
+    image = self.db.get_image('doc_1')
+    ok_(image is None)
+    
+    path = config.server_dir + '/tests/fixtures/test_037233.png'
+    image = open(path)
+    key = 'doc_1'
+    self.db[key] = {}
+    doc = self.db[key]
+    self.db.save_image(doc, image)
+
+    image = self.db.get_image('doc_1')
+    ok_(image)
+    image = self.db.get_image(doc)
+    ok_(image)
+    

@@ -102,6 +102,14 @@ class Database(object):
       raise UpdateConflict(e)
 
 
+  def save_image(self, doc, image):
+    self.db.put_attachment(doc, image, 'snapshot.png', 'image/png')
+
+
+  def get_image(self, doc_or_id):
+    return self.db.get_attachment(doc_or_id, 'snapshot.png')
+
+
   def __getitem__(self, key):
     """
     Dict-like accessor routed through to couchdb.Database
