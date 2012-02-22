@@ -1,9 +1,9 @@
 import os
 import ConfigParser
 
-serverdir = os.environ['SERVERDIR']
+server_dir = os.environ['SERVERDIR']
 _config = ConfigParser.ConfigParser()
-_config.read(os.path.join(serverdir, 'graf', 'environments.cfg'))
+_config.read(os.path.join(server_dir, 'graf', 'environments.cfg'))
 
 
 def get(env, key):
