@@ -1,4 +1,4 @@
-Tue Feb 21 14:59:29 CET 2012
+Wed Feb 22 10:13:47 CET 2012
 Darwin thebe.abstracture.local 11.3.0 Darwin Kernel Version 11.3.0: Thu Jan 12 18:47:41 PST 2012; root:xnu-1699.24.23~1/RELEASE_X86_64 x86_64
 test_01_database.TestConnection.test_01_create_database ... ok
 test_01_database.TestConnection.test_02_drop_database ... ok
@@ -6,8 +6,9 @@ test_01_database.TestConnection.test_03_check_views ... ok
 test_01_database.TestDatabase.test_01_view_unprocessed_docs ... ok
 test_01_database.TestDatabase.test_02_delitem_contains ... ok
 test_02_process_images.TestProcessImages.test_01_process_images ... ok
+test_03_thread_pool.TestThreadPool.test_01_thread_pool ... ok
 
 ----------------------------------------------------------------------
-Ran 6 tests in 3.651s
+Ran 7 tests in 3.802s
 
 OK

@@ -19,12 +19,12 @@ class Worker(threading.Thread):
 
 
 class ThreadPool(object):
-  def __init__(self, size):
+  def __init__(self, size, worker_class=Worker):
     self.size = size
     self.requests = Queue.Queue()
     self.results = Queue.Queue()
     for i in range(self.size):
-      Worker(self.requests, self.results)
+      worker_class(self.requests, self.results)
 
   def schedule_work(self, method, *args, **kwargs):
     request_id = uuid.uuid1().hex
