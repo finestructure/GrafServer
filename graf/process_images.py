@@ -3,12 +3,30 @@ import time
 import logging
 from optparse import OptionParser
 import thread_pool
-from graf.vendor import pypsum
+from graf.vendor import pypsum, deathbycaptcha
 import random
 
 logger = logging.getLogger('graf.process_images')
 
 POOL_SIZE = 8
+
+
+class DbcWorker(thread_pool.Worker):
+  
+  def __init__(self, requests, results, **kwargs):
+    self.client = deathbycaptcha.SocketClient('abstracture', 'i8Kn37rD8v')
+    super(DbcWorker, self).__init__(requests, results, **kwargs)
+
+  def run(self):
+    while True:
+      request_id, method, args, kwargs = self.requests.get()
+      self.results.put( (request_id, method(self.client, *args, **kwargs)) )
+      self.requests.task_done()
+
+
+def dbc_request(client, image=None):
+  print 'balance:', client.get_balance()
+  return dummy_request()
 
 
 def dummy_request():
@@ -20,13 +38,9 @@ def dummy_request():
   return text
 
 
-def process_doc(db, doc):
+def process_doc(client, db, doc):
   logger.info("Processing '%s'" % doc.id)
-  
-  ### replace with dbc ###
-  doc['text_result'] = dummy_request()
-  #######################
-
+  doc['text_result'] = dbc_request(client)
   logger.info("           '%s' => %s" % (doc.id, doc['text_result']))
   doc['processed'] = True
   try:
@@ -46,7 +60,7 @@ class Request(object):
 
 def start_image_processor(env, loop=True, wait=False):
   db = database.connect(env)
-  pool = thread_pool.ThreadPool(POOL_SIZE)
+  pool = thread_pool.ThreadPool(POOL_SIZE, worker_class=DbcWorker)
   requests = {}
   
   while True:
