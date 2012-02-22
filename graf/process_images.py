@@ -10,7 +10,6 @@ logger = logging.getLogger('graf.process_images')
 
 POOL_SIZE = 8
 
-
 class DbcWorker(thread_pool.Worker):
   
   def __init__(self, requests, results, **kwargs):
@@ -24,11 +23,14 @@ class DbcWorker(thread_pool.Worker):
       self.requests.task_done()
 
 
-def dbc_request(client, db, doc):
+def dbc_request(client, db, doc, test_mode=False):
   """
   Sends image to the DBC server for decoding. Returns the request id (captcha id)
   and the text result or nil if there was no result or a timeout.
   """
+  if test_mode:
+    print 'test mode'
+    return 'fake id', dummy_request()
   image = db.get_image(doc)
   captcha = client.decode(image, timeout=60)
   if captcha:
@@ -48,9 +50,9 @@ def dummy_request():
   return text
 
 
-def process_doc(client, db, doc):
+def process_doc(client, db, doc, test_mode=False):
   logger.info("Processing '%s'" % doc.id)
-  request_id, text_result = dbc_request(client, db, doc)
+  request_id, text_result = dbc_request(client, db, doc, test_mode)
   logger.info("           '%s' => %s" % (doc.id, text_result))
   doc['text_result'] = text_result
   doc['request_id'] = request_id
@@ -70,7 +72,7 @@ class Request(object):
     return time.time() - self.started_at > 30
 
 
-def start_image_processor(env, loop=True, wait=False):
+def start_image_processor(env, loop=True, wait=False, test_mode=False):
   db = database.connect(env)
   pool = thread_pool.ThreadPool(POOL_SIZE, worker_class=DbcWorker)
   requests = {}
@@ -83,7 +85,7 @@ def start_image_processor(env, loop=True, wait=False):
       
       try:
         doc = db[row.id]
-        request_id = pool.schedule_work(process_doc, db, doc)
+        request_id = pool.schedule_work(process_doc, db, doc, test_mode)
         requests[row.id] = Request(request_id)
         
       except Exception, e:
@@ -108,6 +110,9 @@ if __name__ == '__main__':
   parser.add_option('-l', '--loglevel', dest='loglevel',
                     default='info',
                     help='set loglevel INFO, WARNING, DEBUG')
+  parser.add_option('-t', '--test', dest='test',
+                    action='store_true', default=False,
+                    help='switch on test mode (use dummy request for decoding)')
   (options, args) = parser.parse_args()
 
   options.loglevel = options.loglevel.upper()
@@ -115,7 +120,11 @@ if __name__ == '__main__':
     logging.getLogger("graf").setLevel(logging.WARNING)
   elif options.loglevel=='DEBUG':
     logging.getLogger("graf").setLevel(logging.DEBUG)
+  test_mode = options.test
 
-  logger.info('Starting image processor')
-  start_image_processor(options.env)
+  msg = 'Starting image processor'
+  if test_mode:
+    msg += ' in TEST mode'
+  logger.info(msg)
+  start_image_processor(options.env, test_mode=test_mode)
   
