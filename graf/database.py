@@ -7,8 +7,10 @@ logger = logging.getLogger('graf.database')
 
 class Server(object):
   
-  def __init__(self, url):
+  def __init__(self, url, username=None, password=None):
     self.server = couchdb.Server(url)
+    if username is not None and password is not None:
+      self.server.resource.credentials = (username, password)
 
   
   def create_database(self, dbname):
@@ -190,7 +192,9 @@ def connect(env, dbname=None):
     debug = config.debug(env)
     if dbname is None:
       dbname = config.get(env, 'dbname')
-  server = Server(url)
+  username = config.username(env)
+  password = config.password(env)
+  server = Server(url, username, password)
   logger.info('Connecting to: %s'  % url )
   logger.info('Using database: %s' % dbname )
   db = server.connect(dbname)
