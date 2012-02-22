@@ -52,11 +52,26 @@ def dummy_request():
 
 def process_doc(client, db, doc, test_mode=False):
   logger.info("Processing '%s'" % doc.id)
+  
+  try:
+    # recorde processing state
+    doc['state'] = 'processing'
+    db.save(doc)
+  except database.UpdateConflict, e:
+    # document has already being processed
+    logger.info("Document '%s' is already being processed" % doc.id)
+    return    
+    
   request_id, text_result = dbc_request(client, db, doc, test_mode)
   logger.info("           '%s' => %s" % (doc.id, text_result))
   doc['text_result'] = text_result
   doc['request_id'] = request_id
   doc['processed'] = True
+  if text_result is None or text_result == '':
+    doc['state'] = 'timeout'
+  else:
+    doc['state'] = 'idle'
+    
   try:
     db.save(doc)
   except database.UpdateConflict, e:
