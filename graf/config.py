@@ -13,13 +13,13 @@ def username(env):
   try:
     return _config.get(env, 'username')
   except ConfigParser.NoOptionError:
-    return False
+    return None
 
 def password(env):
   try:
     return _config.get(env, 'password')
   except ConfigParser.NoOptionError:
-    return False
+    return None
 
 def debug(env):
   try:
