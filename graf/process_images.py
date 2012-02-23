@@ -9,17 +9,23 @@ import random
 logger = logging.getLogger('graf.process_images')
 
 POOL_SIZE = 8
+USERNAME = 'abstracture'
+PASSWORD = 'i8Kn37rD8v'
+
 
 class DbcWorker(thread_pool.Worker):
   
   def __init__(self, requests, results, **kwargs):
-    self.client = deathbycaptcha.SocketClient('abstracture', 'i8Kn37rD8v')
+    self.client = deathbycaptcha.SocketClient(USERNAME, PASSWORD)
     super(DbcWorker, self).__init__(requests, results, **kwargs)
 
   def run(self):
     while True:
       request_id, method, args, kwargs = self.requests.get()
-      self.results.put( (request_id, method(self.client, *args, **kwargs)) )
+      try:
+        self.results.put( (request_id, method(self.client, *args, **kwargs)) )
+      except Exception, e:
+        logger.warn('Exception in DbcWorker: %s' % e)
       self.requests.task_done()
 
 
@@ -96,18 +102,15 @@ def start_image_processor(env, loop=True, wait=False, test_mode=False):
   requests = {}
   
   while True:
-    for row in db.unprocessed_docs_view():
-      
-      if row.id in requests and not requests[row.id].has_timed_out():
-        continue
-      
-      try:
+    try:
+      for row in db.unprocessed_docs_view():
+        if row.id in requests and not requests[row.id].has_timed_out():
+          continue
         doc = db[row.id]
         request_id = pool.schedule_work(process_doc, db, doc, test_mode)
         requests[row.id] = Request(request_id)
-        
-      except Exception, e:
-        logger.warn("Skipped '%s' due to exception '%s'", (row.id, e))
+    except Exception, e:
+      logger.warn("Exception in while processing view: '%s'", e)
     
     if not loop:
       break
