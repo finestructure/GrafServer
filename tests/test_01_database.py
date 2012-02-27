@@ -38,7 +38,7 @@ class TestConnection(object):
     db = self.server.connect(dbname)
     db.check_views()
     # test
-    design = db.get('_design/graf')
+    design = db.get(db.design_name)
     ok_(design)
     ok_(design['views'])
     eq_(Database.version, design['version'])

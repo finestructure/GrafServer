@@ -46,7 +46,7 @@ class Database(object):
     self.db = db
 
   # view constants
-  design_name = '_design/graf'
+  design_name = '_design/GrafServer'
   version = 1
   unprocessed_docs = 'unprocessed_docs'
   doc_created_at = 'doc_created_at'
