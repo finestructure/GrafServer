@@ -9,6 +9,7 @@ import random
 logger = logging.getLogger('graf.process_images')
 
 POOL_SIZE = 8
+TIMEOUT = 60
 USERNAME = 'abstracture'
 PASSWORD = 'i8Kn37rD8v'
 
@@ -38,7 +39,7 @@ def dbc_request(client, db, doc, test_mode=False):
     print 'test mode'
     return 'fake id', dummy_request()
   image = db.get_image(doc)
-  captcha = client.decode(image, timeout=60)
+  captcha = client.decode(image, timeout=TIMEOUT)
   if captcha:
     # The CAPTCHA was solved; captcha["captcha"] item holds its
     # numeric ID, and captcha["text"] item its text.
@@ -93,7 +94,7 @@ class Request(object):
   def __init__(self, request_id):
     self.started_at = time.time()
   def has_timed_out(self):
-    return time.time() - self.started_at > 30
+    return time.time() - self.started_at > TIMEOUT
 
 
 def start_image_processor(env, loop=True, wait=False, test_mode=False):
