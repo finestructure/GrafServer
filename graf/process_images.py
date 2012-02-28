@@ -118,7 +118,7 @@ class Request(object):
     return time.time() - self.started_at > TIMEOUT
 
 services=[ dbc_processor_factory,
-           pbc_processor_factory,
+           #pbc_processor_factory,
          ]
 test_services=[ 
   md5_processor_factory 
