@@ -55,7 +55,7 @@ class TestProcessImages(object):
     eq_(len(res), 5)
 
     process_images.start_image_processor(env, test_services,
-                                         loop=False, wait=True, test_mode=True)
+                                         loop=False, wait=True)
     
     res = self.db.unprocessed_docs_view()
     eq_(len(res), 0)

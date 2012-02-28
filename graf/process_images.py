@@ -21,7 +21,7 @@ class DocPicProcessor:
     self.service_name = service_name
     self.client = client
 
-  def process( self, db, doc_id, test_mode=False):
+  def process( self, db, doc_id ):
     logger.info("Processing '%s' using '%s'" % (doc_id, self.service_name))
     doc=db[doc_id]
     try:
@@ -34,7 +34,7 @@ class DocPicProcessor:
       #return
     
     start = time.time()
-    request_id, text_result = do_request(self.client, db, doc, test_mode)
+    request_id, text_result = do_request(self.client, db, doc)
     elapsed = time.time() - start
 
     logger.info("           '%s' using '%s' => %s (%.1fs)" , 
@@ -90,14 +90,11 @@ def md5_processor_factory():
   return DocPicProcessor( "md5", 
                          md5_api.md5Client() )
 
-def do_request(client, db, doc_id, test_mode=False):
+def do_request(client, db, doc_id):
   """
   Sends image to the DBC server for decoding. Returns the request id (captcha id)
   and the text result or nil if there was no result or a timeout.
   """
-  if 0 and test_mode:
-    print 'test mode'
-    return 'fake id', dummy_request()
   image = db.get_image(doc_id)
   captcha = client.decode(image, timeout=TIMEOUT)
   if captcha:
@@ -107,16 +104,6 @@ def do_request(client, db, doc_id, test_mode=False):
   else:
     return (None, None)
 
-
-def dummy_request():
-  count = int(random.uniform(1,4))
-  time.sleep(count)
-  text = pypsum.get_lipsum(howmany=count, what='words', start_with_lipsum='0')
-  text = text[0]
-  text = ' '.join(text.split()[:count]) # service always returns at least 5 words
-  return text
-
-
 class Request(object):
   def __init__(self, request_id):
     self.started_at = time.time()
@@ -125,11 +112,12 @@ class Request(object):
 
 services=[ dbc_processor_factory,
            pbc_processor_factory,
-           md5_processor_factory
          ]
+test_services=[ 
+  md5_processor_factory 
+]
 
-
-def start_image_processor(env, services, loop=True, wait=False, test_mode=False):
+def start_image_processor(env, services, loop=True, wait=False ):
   db = database.connect(env)
   # generate array of ( pool, requests ) tupels, with a thread pool and
   # a dictionary with for this pool currently open requests
@@ -145,7 +133,7 @@ def start_image_processor(env, services, loop=True, wait=False, test_mode=False)
         for pool, requests in pool_requests:
           if row.id in requests and not requests[row.id].has_timed_out():
             continue
-          request_id = pool.schedule_work(db, row.id, test_mode)
+          request_id = pool.schedule_work(db, row.id)
           requests[row.id] = Request(request_id)
     except Exception, e:
       logger.exception("Exception in while processing view: '%s'", e)
@@ -183,8 +171,10 @@ if __name__ == '__main__':
   test_mode = options.test
 
   msg = 'Starting image processor'
+  use_services=services
   if test_mode:
     msg += ' in TEST mode'
+    use_services=test_services
   logger.info(msg)
-  start_image_processor(options.env, test_mode=test_mode)
+  start_image_processor(options.env, use_services)
   
