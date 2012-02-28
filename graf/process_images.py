@@ -46,7 +46,6 @@ class DocPicProcessor:
     while True:
       # reload document, to get changes by other threads
       doc=db[doc_id]
-      doc['text_result'] = str(text_result)
       if not doc.has_key('service_results'):
         doc['service_results'] = {}
       doc['service_results'][self.service_name]=text_result
@@ -55,6 +54,14 @@ class DocPicProcessor:
       if not doc['results'].has_key(text_result):
         doc['results'][text_result] = 0
       doc['results'][text_result] += 1
+
+      # update text_result with majority vote
+      max_count=0
+      best_result=None
+      for key, value in doc['results'].items():
+        if max_count<value:
+          best_result=key
+      doc['text_result'] = best_result
 
       doc['request_id'] = request_id
       doc['processed'] = True
@@ -73,7 +80,7 @@ class DocPicProcessor:
                     doc.id, self.service_name)
         conflict_count+=1
         if conflict_count > 3:
-          logger.info("Update conflict breaking from loop  doc '%s' using '%s'", 
+          logger.info("Conflict, breaking from update loop doc '%s' using '%s'", 
                       doc.id, self.service_name)
           break
         pass

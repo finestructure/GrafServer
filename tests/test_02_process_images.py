@@ -59,7 +59,7 @@ class TestProcessImages(object):
     
     res = self.db.unprocessed_docs_view()
     eq_(len(res), 0)
-    #eq_(self.db["doc_0"]['text_result'], "4696be653570ff52ac18be26b001c9e4")
+    eq_(self.db["doc_0"]['text_result'], "4696be653570ff52ac18be26b001c9e4")
     eq_(self.db["doc_0"]['results']["4696be653570ff52ac18be26b001c9e4"], 2 )
     eq_(self.db["doc_0"]['results']["d142c9425f29ca74a659870abbb2d0252348e487"], 1 )
     eq_(self.db["doc_0"]['service_results']['md5'],
@@ -69,7 +69,7 @@ class TestProcessImages(object):
     eq_(self.db["doc_0"]['service_results']['sha1'],
         "d142c9425f29ca74a659870abbb2d0252348e487")
 
-    #eq_(self.db["doc_1"]['text_result'], "4696be653570ff52ac18be26b001c9e4")
+    eq_(self.db["doc_1"]['text_result'], "4696be653570ff52ac18be26b001c9e4")
     eq_(self.db["doc_1"]['results']["4696be653570ff52ac18be26b001c9e4"], 2 )
     eq_(self.db["doc_1"]['results']["d142c9425f29ca74a659870abbb2d0252348e487"], 1 )
     eq_(self.db["doc_1"]['service_results']['md5'],
@@ -79,7 +79,7 @@ class TestProcessImages(object):
     eq_(self.db["doc_1"]['service_results']['sha1'],
         "d142c9425f29ca74a659870abbb2d0252348e487")
 
-    #eq_(self.db["doc_2"]['text_result'], "4696be653570ff52ac18be26b001c9e4")
+    eq_(self.db["doc_2"]['text_result'], "4696be653570ff52ac18be26b001c9e4")
     eq_(self.db["doc_2"]['results']["4696be653570ff52ac18be26b001c9e4"], 2 )
     eq_(self.db["doc_2"]['results']["d142c9425f29ca74a659870abbb2d0252348e487"], 1 )
     eq_(self.db["doc_2"]['service_results']['md5'],
@@ -89,7 +89,7 @@ class TestProcessImages(object):
     eq_(self.db["doc_2"]['service_results']['sha1'],
         "d142c9425f29ca74a659870abbb2d0252348e487")
     
-    #eq_(self.db["doc_3"]['text_result'], "4696be653570ff52ac18be26b001c9e4")
+    eq_(self.db["doc_3"]['text_result'], "4696be653570ff52ac18be26b001c9e4")
     eq_(self.db["doc_3"]['results']["4696be653570ff52ac18be26b001c9e4"], 2 )
     eq_(self.db["doc_3"]['results']["d142c9425f29ca74a659870abbb2d0252348e487"], 1 )
     eq_(self.db["doc_3"]['service_results']['md5'],
@@ -99,7 +99,7 @@ class TestProcessImages(object):
     eq_(self.db["doc_3"]['service_results']['sha1'],
         "d142c9425f29ca74a659870abbb2d0252348e487")
 
-    #eq_(self.db["doc_4"]['text_result'], "4696be653570ff52ac18be26b001c9e4")
+    eq_(self.db["doc_4"]['text_result'], "4696be653570ff52ac18be26b001c9e4")
     eq_(self.db["doc_4"]['results']["4696be653570ff52ac18be26b001c9e4"], 2 )
     eq_(self.db["doc_4"]['results']["d142c9425f29ca74a659870abbb2d0252348e487"], 1 )
     eq_(self.db["doc_4"]['service_results']['md5'],
