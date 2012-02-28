@@ -1,10 +1,13 @@
 import threading
+import logging
 import Queue
 import uuid
 
+logger = logging.getLogger('graf.thread_pool')
 
 class Worker(threading.Thread):
-  def __init__(self, requests, results, **kwargs):
+  def __init__(self, process_class, requests, results, **kwargs):
+    self.process_class = process_class
     threading.Thread.__init__(self, **kwargs)
     self.daemon = True
     self.requests = requests
@@ -13,22 +16,27 @@ class Worker(threading.Thread):
   
   def run(self):
     while True:
-      request_id, method, args, kwargs = self.requests.get()
-      self.results.put( (request_id, method(*args, **kwargs)) )
+      request_id, args, kwargs = self.requests.get()
+      try:
+        self.results.put( (request_id,
+                           self.process_class.process(*args, **kwargs) ) )
+      except Exception, e:
+        logger.exception('Exception in PicWorker: %s' % e)
       self.requests.task_done()
 
 
 class ThreadPool(object):
-  def __init__(self, size, worker_class=Worker):
+  def __init__(self, size, worker_class=Worker, 
+               process_class_factory = None ):
     self.size = size
     self.requests = Queue.Queue()
     self.results = Queue.Queue()
     for i in range(self.size):
-      worker_class(self.requests, self.results)
+      worker_class(process_class_factory(), self.requests, self.results)
 
-  def schedule_work(self, method, *args, **kwargs):
+  def schedule_work(self, *args, **kwargs):
     request_id = uuid.uuid1().hex
-    self.requests.put( (request_id, method, args, kwargs) )
+    self.requests.put( (request_id, args, kwargs) )
     return request_id
 
   def join(self):

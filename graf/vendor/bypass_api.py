@@ -1,5 +1,17 @@
 import urllib,base64
 
+class bypassClient():
+  def __init__(self, key):
+    self.__key = key
+
+  def decode( self, image, timeout=0):
+    try:
+      ret=bc_submit_captcha(self.__key, image)
+      return {"captcha":image, "text":ret}
+    except:
+      return None
+
+
 def bc_split(data):
 	ret = {}
 	lines = data.splitlines()
@@ -19,12 +31,9 @@ def bc_post_data(url, data):
 	f.close()
 	return bc_split(con)
 
-def bc_submit_captcha(key, img_file_name):
+def bc_submit_captcha(key, img):
 	task_id = -1
-	FILE = open(img_file_name, 'rb')
-	con = FILE.read()
-	FILE.close()
-	con = base64.b64encode(con)
+	con = base64.b64encode(img)
 	ret = bc_post_data("http://bypasscaptcha.com/upload.php", \
 			{ "key": key, "file": con, "submit": "Submit", "gen_task_id": 1, "base64_code": 1})
 	v = {}

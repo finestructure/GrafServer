@@ -60,7 +60,7 @@ class TestDatabase(object):
   
   
   def tearDown(self):
-    #drop_database(env)
+    drop_database(env)
     pass
 
 
