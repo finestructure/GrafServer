@@ -117,10 +117,17 @@ class Database(object):
     Dict-like accessor routed through to couchdb.Database
     """
     try:
-      return self.db[key]
+      # workaround bug 204? 
+      # http://code.google.com/p/couchdb-python/issues/detail?id=204
+      while (True):
+        try:
+          return self.db[key]
+        except KeyError:
+          pass
+
     except couchdb.ResourceNotFound:
       raise DocumentNotFound(key)
-  
+
 
   def __setitem__(self, key, value):
     """
