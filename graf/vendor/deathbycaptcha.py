@@ -100,13 +100,13 @@ DEFAULT_TIMEOUT = 60
 POLLS_INTERVAL = 5
 
 # Base HTTP API url
-HTTP_BASE_URL = 'http://api.deathbycaptcha.com/api'
+HTTP_BASE_URL = 'http://api.dbcapi.me/api'
 
 # Preferred HTTP API server's response content type, do not change
 HTTP_RESPONSE_TYPE = 'application/json'
 
 # Socket API server's host & ports range
-SOCKET_HOST = 'api.deathbycaptcha.com'
+SOCKET_HOST = 'api.dbcapi.me'
 SOCKET_PORTS = range(8123, 8131)
 
 
